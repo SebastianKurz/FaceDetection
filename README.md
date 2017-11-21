@@ -5,4 +5,4 @@ position of them. The second step is optimization. As a result the network shoud
 step is important for the last stage. Finally the Network will analyse a live video served by a webcam and track the 
 faces present in the stream.
 
-The programming used programming language will be Python.
+The used programming language will be Python.
