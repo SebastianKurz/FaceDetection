@@ -52,7 +52,7 @@ def gen_load_imgs(path_to_file):
         
         yield img_with_metadata
 
-
+# test
 for img in gen_load_imgs("Data/wider_face_train_bbx_gt.txt"):
     pic = img.get("img" , None)
     if (pic != None):

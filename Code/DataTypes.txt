@@ -1,0 +1,7 @@
+metadata_list = [metadata]
+
+metadata = {"imgname" , "positions"}
+
+positions = [dimension]
+
+dimension = {"x", "y", "width", "height"}
