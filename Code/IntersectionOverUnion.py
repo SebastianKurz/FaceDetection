@@ -89,7 +89,7 @@ def intersection_over_union(actual_position, calculated_position):
 
 
 
-#small test
+# test
 intersec = intersection_area_sum({"x": 2, "y": 2, "width": 5, "height": 4} , {"x": 3, "y": 1, "width": 5, "height": 4})
 union = union_area_sum({"x": 2, "y": 2, "width": 5, "height": 4} , {"x": 3, "y": 1, "width": 5, "height": 4})
 iou = intersection_over_union({"x": 2, "y": 2, "width": 5, "height": 4} , {"x": 3, "y": 1, "width": 5, "height": 4})
