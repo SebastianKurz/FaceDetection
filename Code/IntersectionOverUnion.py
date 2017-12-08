@@ -1,6 +1,37 @@
 from pprint import pprint
 
 
+def rectangles_collide(actual_position, calculated_position):
+    x_actual = actual_position.get("x", None)
+    y_actual = actual_position.get("y", None)
+    w_actual = actual_position.get("width", None)
+    h_actual = actual_position.get("height", None)
+    
+    x_calculated = calculated_position.get("x", None)
+    y_calculated = calculated_position.get("y", None)
+    w_calculated = calculated_position.get("width", None)
+    h_calculated =  calculated_position.get("height", None)
+
+    #conditions
+    x_a = (x_actual <= x_calculated) and (x_calculated < (x_actual + w_actual))
+    x_b = (x_calculated <= x_actual) and (x_actual < (x_calculated + w_calculated))
+    y_a = (y_actual <= y_calculated) and (y_calculated < (y_actual + w_actual))
+    y_b = (y_calculated <= y_actual) and (y_actual < (y_calculated + w_calculated))
+
+    if (((x_a) or (x_b)) and ((y_a) or (y_b))):
+        return True
+
+    """
+    #TODO: irgend ne Klammerung fixen...
+    if ((((x_actual <= x_calculated) and (x_calculated < x_actual + w_actual)) or
+        ((x_calculated <= x_actual) and (x_actual < x_calculated + w_calculated))) and
+        (((y_actual <= y_calculated) and (y_calculated < y_actual + w_actual)) or
+        ((y_calculated <= y_actual) and (y_actual < y_calculated + w_calculated))))
+        return True
+    else return False
+    """
+
+
 def points_in_intersection_area(actual_position, calculated_position):
     """
     Calculates all common points of the box of the ground-trouth and the calculated box
