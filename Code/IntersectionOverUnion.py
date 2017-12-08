@@ -53,8 +53,8 @@ def intersection_area_position(coordinate_points):
         if(x_min == None and x_max == None and y_min == None and y_max == None):
             x_min = x
             x_max = x
-            y_min = x
-            y_max = x
+            y_min = y
+            y_max = y
         else:
             if(x <= x_min):
                 x_min = x
@@ -65,7 +65,7 @@ def intersection_area_position(coordinate_points):
             if(y_max <= y):
                 y_max = y
     
-    return {"x": x_min , "y": y_min, "width": (x_max -x_min + 1), "height": (y_max - y_min + 1)}
+    return {"x": x_min , "y": y_min, "width": (x_max - x_min + 1), "height": (y_max - y_min + 1)}
 
 def pixel_sum(position):
     """
@@ -90,6 +90,7 @@ def intersection_over_union(actual_position, calculated_position):
 
 
 # test
+"""
 intersec = intersection_area_sum({"x": 2, "y": 2, "width": 5, "height": 4} , {"x": 3, "y": 1, "width": 5, "height": 4})
 union = union_area_sum({"x": 2, "y": 2, "width": 5, "height": 4} , {"x": 3, "y": 1, "width": 5, "height": 4})
 iou = intersection_over_union({"x": 2, "y": 2, "width": 5, "height": 4} , {"x": 3, "y": 1, "width": 5, "height": 4})
@@ -99,3 +100,4 @@ pprint (intersecCoordinates)
 print (str(intersec))
 print (str(union))
 print (str(iou))
+"""

@@ -47,12 +47,13 @@ def gen_load_imgs(path_to_file):
             path = "Data/" + path
             #print(path)
         
-        img = cv2.imread(path, 0)
+        img = cv2.imread(path, 1)
         img_with_metadata = {"img" : img , "positions" : metadata.get("positions")}
         
         yield img_with_metadata
 
 # test
+"""
 for img in gen_load_imgs("Data/wider_face_train_bbx_gt.txt"):
     pic = img.get("img" , None)
     if (pic != None):
@@ -62,3 +63,4 @@ for img in gen_load_imgs("Data/wider_face_train_bbx_gt.txt"):
     
     positions = img.get("positions")
     pprint(positions)
+"""
