@@ -65,9 +65,7 @@ def pixel_sum(position):
 
 def intersection_union(actual_position, calculated_position):
     """
-    intersection_coordinate = intersection_area_position(points_in_intersection_area(actual_position, calculated_position))
-    intersection = pixel_sum(intersection_coordinate)
-    union = pixel_sum(actual_position) + pixel_sum(calculated_position) - intersection
+    returns the values for the intersection and the union
     """
     intersection_coordinate = calc_intersection(actual_position, calculated_position)
     intersec = pixel_sum(intersection_coordinate)

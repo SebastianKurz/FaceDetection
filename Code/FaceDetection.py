@@ -7,6 +7,9 @@ FACE_CASCADE = cv2.CascadeClassifier('haar_cascade.xml')
 SIDE_CASCADE = cv2.CascadeClassifier('lbpcascade_sideface.xml')
 
 def detect_faces(img):
+    """
+    Method for detecting all faces in a given image.
+    """
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     faces = FACE_CASCADE.detectMultiScale(
@@ -33,14 +36,7 @@ def detect_faces(img):
 
 def draw_boxes(img, facepositions, color):
     """
-    color is a tuple containing three values for rgb-colors like (0, 255, 0)
+    color is a tuple containing three values for bgr-colors like (0, 255, 0)
     """
     for x, y, w, h in facepositions:
         cv2.rectangle(img, (x,y), (x+w, y+h), color)
-
-
-def display_image(img):
-    cv2.imshow("Webcam stream", frame)
-
-    if (cv2.waitKey(1) & 0xFF) == ord("q"):
-        cv2.destroyAllWindows()
