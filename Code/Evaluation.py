@@ -38,8 +38,6 @@ def evaluate():
                 calculated_position = {"x": x, "y": y, "width": w, "height": h}
                 if (IoU.rectangles_collide(position, calculated_position)):
                     if(position != None and calculated_position != None):
-                        #i_s= IoU.intersection_area_sum(position, calculated_position)
-                        #u_s= IoU.union_area_sum(position, calculated_position)
                         i_s, u_s = IoU.intersection_union(position, calculated_position)
                         if(i_s != None):
                             intersection_sum += i_s
@@ -50,6 +48,8 @@ def evaluate():
             intersection_over_union = intersection_sum / union_sum
             print("[No. of processed imgs:", itr, "]")
             print("[intersection over union percentage:] " , intersection_over_union)
+        
+        #remove the comment marks of the following 2 lines for getting a visualization
         #cv2.imshow("pictures", img)
         #cv2.waitKey(500)
 
