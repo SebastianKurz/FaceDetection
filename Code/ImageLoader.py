@@ -39,6 +39,7 @@ def read_file(path_to_file):
 
 def gen_load_imgs(path_to_file):
     metadata_list = read_file(path_to_file)
+    print("[Total image count:]", len(metadata_list))
     
     for metadata in metadata_list:
         path = metadata.get("imgname", None)
@@ -51,16 +52,3 @@ def gen_load_imgs(path_to_file):
         img_with_metadata = {"img" : img , "positions" : metadata.get("positions")}
         
         yield img_with_metadata
-
-# test
-"""
-for img in gen_load_imgs("Data/wider_face_train_bbx_gt.txt"):
-    pic = img.get("img" , None)
-    if (pic != None):
-        cv2.imshow("image" , pic)
-        cv2.waitKey(100)
-        cv2.destroyAllWindows()
-    
-    positions = img.get("positions")
-    pprint(positions)
-"""

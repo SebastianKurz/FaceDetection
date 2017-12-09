@@ -44,20 +44,3 @@ def display_image(img):
 
     if (cv2.waitKey(1) & 0xFF) == ord("q"):
         cv2.destroyAllWindows()
-
-
-
-#test
-"""
-imgs = il.gen_load_imgs("Data/wider_face_train_bbx_gt.txt")
-
-for i in imgs:
-    img = i.get("img", None)
-    faces = detect_faces(img)
-    draw_boxes(img, faces, (255, 0, 0))
-
-    cv2.imshow("Image", img)
-    cv2.waitKey(1000)
-
-    pprint(faces)
-"""
