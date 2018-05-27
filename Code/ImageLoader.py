@@ -67,9 +67,6 @@ def load_resized_imgs(path_to_file, size):
 
         image = cv2.resize(image, (size,size))
 
-        print(scalefactor_width)
-        print(scalefactor_height)
-
         scaled_img = {"img" : image, "positions": img.get("positions"), "sfw" : scalefactor_width, "sfh" : scalefactor_height }
         yield scaled_img
 
