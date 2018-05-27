@@ -16,3 +16,5 @@ Code/Data/
 Code/__pycache__/
 
 Code/DataTypes\.txt
+
+\.vscode/settings\.json

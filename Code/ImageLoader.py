@@ -1,6 +1,7 @@
 import re
 import cv2
 from pprint import pprint
+import numpy as np
 
 
 def read_file(path_to_file):
@@ -52,3 +53,47 @@ def gen_load_imgs(path_to_file):
         img_with_metadata = {"img" : img , "positions" : metadata.get("positions")}
         
         yield img_with_metadata
+
+def load_resized_imgs(path_to_file, size):
+    imgs = gen_load_imgs(path_to_file)
+
+    for img in imgs:
+        image = img.get("img", None)
+
+        height = np.size(image, 0)
+        width = np.size(image, 1)
+        scalefactor_width = size / width
+        scalefactor_height = size / height
+
+        image = cv2.resize(image, (size,size))
+
+        print(scalefactor_width)
+        print(scalefactor_height)
+
+        scaled_img = {"img" : image, "positions": img.get("positions"), "sfw" : scalefactor_width, "sfh" : scalefactor_height }
+        yield scaled_img
+
+def visualize_resized_imgs(path_to_file, size):
+    imgs = load_resized_imgs(path_to_file, size)
+
+    for img in imgs:
+        positions = img.get("positions", [])
+        sfw = img.get("sfw", 1)
+        sfh = img.get("sfh", 1)
+
+        if (positions != None):
+            for p in positions:
+                x = p.get("x") * sfw
+                y = p.get("y") * sfh
+                w = p.get("width") * sfw
+                h = p.get("height") * sfh
+
+                cv2.rectangle(
+                    img.get("img"),
+                    (int(x), int(y)),
+                    (int(x+w), int(y+h)),
+                    (0,255,0)
+                )    
+
+        cv2.imshow("resized image", img.get("img"))
+        cv2.waitKey(1000)
