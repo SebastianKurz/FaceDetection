@@ -92,5 +92,7 @@ def visualize_resized_imgs(path_to_file, size):
                     (0,255,0)
                 )    
 
+        print(type(img.get("img")))
+        print(img.get("img").shape)
         cv2.imshow("resized image", img.get("img"))
         cv2.waitKey(1000)

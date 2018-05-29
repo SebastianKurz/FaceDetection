@@ -1,58 +1,29 @@
 from keras.models import Sequential
 from keras.layers import Conv2D
 from keras.layers import MaxPool2D
+from keras.optimizers import SGD
 import numpy as np
 import cv2
 
 import ImageLoader as il
 
-row_size = 291
+sliding_window_size = 50
+row_size = 250
 scale_size = 600
+btch_size = 50
+epoch_amount = 10
 
 images = il.load_resized_imgs("Data/wider_face_train_bbx_gt.txt", 600)
-train_samples = []
-train_labels = []
+samples = []
+labels = []
 
 
-#  <-----model----->
-
-model = Sequential([
-    # width x hight x dimension
-    # 600x600x3
-    Conv2D(10, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform", input_shape=(600, 600, 3)),
-    # 596x596x10
-    MaxPool2D((2,2), data_format="channels_last"),
-    # 298x298x10
-    Conv2D(20, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 294x294x20
-    MaxPool2D((2,2), data_format="channels_last"),
-    # 147x147x20
-    Conv2D(20, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 143x143x20
-    MaxPool2D((2,2), data_format="channels_last"),
-    # 71x71x20
-    Conv2D(20, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 67x67x20
-    MaxPool2D((3,3), data_format="channels_last"),
-    # 22x22x20
-    Conv2D(9680, 22, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 1x1x9680
-    Conv2D(9680, 1, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 1x1x9680
-    Conv2D(84681, 1, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform", activation="softmax")
-    # 1x1x84681 (Output --> 291x291; each Pixel equals one Bounding Box with fix sized shape of 20x20)
-])
-
-model.summary()
-
-
-#  <-----utilities----->
-
+# -----utilities-----
 def convert_to_trainingdata():
     for image in images:
         sfw = image.get("sfw", None)
         sfh = image.get("sfh", None)
-        array = np.zeros(shape=(84681,))
+        array = np.zeros(shape=(1,1,84681))
 
         positions = image.get("positions", None)
 
@@ -63,10 +34,10 @@ def convert_to_trainingdata():
                 w = position.get("width", None)
                 h = position.get("height", None)
 
-                array[convert_coordinates(x, y, w, h, sfw, sfh)] = 1
+                array[0,0,convert_coordinates(x, y, w, h, sfw, sfh)] = 1
         
-        train_samples.append(image_to_array(image))
-        train_labels.append(array)
+        samples.append(image.get("img", None))
+        labels.append(array)
 
 
 def convert_coordinates(x, y, w, h, sfw, sfh):
@@ -108,8 +79,73 @@ def convert_coordinates(x, y, w, h, sfw, sfh):
     # print("index_array: ", index_array)
     
     return index_array
-    
 
-def image_to_array(image):
-    # TODO
-    return image
+
+convert_to_trainingdata()
+
+x_train = np.array(samples[:int(len(samples) / 2)])
+x_test = np.array(samples[int(len(samples) / 2):])
+
+del samples[:]
+
+y_train = np.array(labels[:int(len(labels) / 2)])
+y_test = np.array(labels[int(len(labels) / 2):])
+
+del labels[:]
+
+
+# -----model-----
+
+model = Sequential([
+    # width x hight x dimension
+    # 600x600x3
+    Conv2D(10, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform", input_shape=(600, 600, 3)),
+    # 596x596x10
+    MaxPool2D((2,2), data_format="channels_last"),
+    # 298x298x10
+    Conv2D(20, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
+    # 294x294x20
+    MaxPool2D((2,2), data_format="channels_last"),
+    # 147x147x20
+    Conv2D(20, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
+    # 143x143x20
+    MaxPool2D((2,2), data_format="channels_last"),
+    # 71x71x20
+    Conv2D(20, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
+    # 67x67x20
+    MaxPool2D((3,3), data_format="channels_last"),
+    # 22x22x20
+    Conv2D(9680, 22, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
+    # 1x1x9680
+    Conv2D(9680, 1, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
+    # 1x1x9680
+    Conv2D(84681, 1, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform", activation="softmax")
+    # 1x1x84681 (Output --> 291x291; each Pixel equals one Bounding Box with fix sized shape of 20x20)
+])
+
+model.summary()
+
+model.compile(
+    SGD(lr=0.001), 
+    loss="mean_squared_error",  
+    metrics=[
+        "accuracy", 
+        "binary_accuracy", 
+        "categorical_accuracy"
+    ]
+)
+
+model.fit(
+    x_train,
+    y_train,
+    batch_size=btch_size,
+    epochs=epoch_amount,
+    verbose=2
+)
+
+score = model.evaluate(
+    x_test,
+    y_test,
+    batch_size=btch_size,
+    verbose=1
+)
