@@ -71,8 +71,8 @@ def load_resized_imgs(path_to_file, size):
         yield scaled_img
 
 def visualize_resized_imgs(path_to_file, size):
-    imgs = load_resized_imgs(path_to_file, size)
-
+    # imgs = load_resized_imgs(path_to_file, size)
+    imgs = load_cropped_imags(path_to_file, size)
     for img in imgs:
         positions = img.get("positions", [])
         sfw = img.get("sfw", 1)
@@ -92,7 +92,43 @@ def visualize_resized_imgs(path_to_file, size):
                     (0,255,0)
                 )    
 
-        print(type(img.get("img")))
         print(img.get("img").shape)
         cv2.imshow("resized image", img.get("img"))
         cv2.waitKey(1000)
+
+
+def load_cropped_imags(path_to_file, size):
+    imgs = gen_load_imgs(path_to_file)
+
+    for img in imgs:
+
+        image = img.get("img", None)
+        positions = img.get("positions", None)
+        new_positions = []
+
+        width = np.size(image, 1)
+        height = np.size(image, 0)
+
+        if((width and height) >=600 ):
+            pos_x = int(width/2) - int(size/2)
+            pos_y = int(height/2) - int(size/2)
+
+            image = image[pos_y:(pos_y+size), pos_x:(pos_x+size)]
+
+            for position in positions:
+                x = position.get("x", None) - size
+                y = position.get("y", None) - size
+                w = position.get("width", None)
+                h = position.get("height", None)
+
+                #not(x < pos_x or (x or (x+w)) >= (pos_x+size) or y < pos_y or (y or (y+h)) >= (pos_y+size))
+                if(not(x < 0) and not( x >= size) and not((x+w) >= size)):
+                    if(not(y < 0) and not(y >= size) and not((y+h) >= size)):
+                        #x = x-size
+                        #y = y-size
+                        position = {"x": x, "y": y, "width": w, "height": h}
+                        print(position)
+                        new_positions.append(position)
+            
+            new_image = {"img": image, "positions": new_positions, "sfw": 1, "sfh": 1}
+            yield new_image
