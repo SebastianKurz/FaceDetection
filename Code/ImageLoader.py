@@ -72,7 +72,8 @@ def load_resized_imgs(path_to_file, size):
 
 def visualize_resized_imgs(path_to_file, size):
     # imgs = load_resized_imgs(path_to_file, size)
-    imgs = load_cropped_imags(path_to_file, size)
+    imgs = load_cropped_imgs(path_to_file, size)
+
     for img in imgs:
         positions = img.get("positions", [])
         sfw = img.get("sfw", 1)
@@ -93,11 +94,16 @@ def visualize_resized_imgs(path_to_file, size):
                 )    
 
         print(img.get("img").shape)
+        print(type(img.get("img")))
         cv2.imshow("resized image", img.get("img"))
         cv2.waitKey(1000)
 
 
-def load_cropped_imags(path_to_file, size):
+def load_cropped_imgs(path_to_file, size):
+    """
+    Problem: nicht alle geladenen Bilder haben den shape 600x600x3
+    Lösung: es gibt Bilder, deren width = 0 ist. Diese kackvögel...
+    """
     imgs = gen_load_imgs(path_to_file)
 
     for img in imgs:
@@ -109,26 +115,27 @@ def load_cropped_imags(path_to_file, size):
         width = np.size(image, 1)
         height = np.size(image, 0)
 
-        if((width and height) >=600 ):
-            pos_x = int(width/2) - int(size/2)
-            pos_y = int(height/2) - int(size/2)
+        if(width >=600 and height >= 600):
+            pos_x = int(width/2) - int(size/2) - 1
+            pos_y = int(height/2) - int(size/2) - 1
 
             image = image[pos_y:(pos_y+size), pos_x:(pos_x+size)]
+            # print(type(image))
 
             for position in positions:
-                x = position.get("x", None) - size
-                y = position.get("y", None) - size
+                x = position.get("x", None)
+                y = position.get("y", None)
                 w = position.get("width", None)
                 h = position.get("height", None)
 
-                #not(x < pos_x or (x or (x+w)) >= (pos_x+size) or y < pos_y or (y or (y+h)) >= (pos_y+size))
-                if(not(x < 0) and not( x >= size) and not((x+w) >= size)):
-                    if(not(y < 0) and not(y >= size) and not((y+h) >= size)):
-                        #x = x-size
-                        #y = y-size
+
+                if((x >= pos_x) and (x <= size) and ((x+w) <= size)):
+                    if((y >= pos_y) and (y <= size) and ((y+h) <= size)):
+                        x = x - pos_x
+                        y = y - pos_y
                         position = {"x": x, "y": y, "width": w, "height": h}
-                        print(position)
                         new_positions.append(position)
             
-            new_image = {"img": image, "positions": new_positions, "sfw": 1, "sfh": 1}
-            yield new_image
+            if(image.shape == (600,600,3)):
+                new_image = {"img": image, "positions": new_positions, "sfw": 1, "sfh": 1}
+                yield new_image

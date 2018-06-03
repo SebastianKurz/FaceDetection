@@ -7,16 +7,16 @@ import cv2
 
 import ImageLoader as il
 
-# windows don't overlap
+
 scale_size = 600
 
-sliding_window_size = 20
+sliding_window_size = 20 # windows don't overlapp
 row_size = int(scale_size / sliding_window_size) # 30
 
-btch_size = 20
-epoch_amount = 20
+btch_size = 50
+epoch_amount = 140
 
-images = il.load_resized_imgs("Data/wider_face_train_bbx_gt.txt", 600)
+images = il.load_cropped_imgs("Data/wider_face_train_bbx_gt.txt", 600)
 samples = []
 labels = []
 
@@ -58,20 +58,22 @@ def convert_to_trainingsdata():
             array[label_position.get("i_x"), label_position.get("i_y"), 1] = label_position.get("y_rel")
             array[label_position.get("i_x"), label_position.get("i_y"), 2] = label_position.get("w")
             array[label_position.get("i_x"), label_position.get("i_y"), 3] = label_position.get("h")
-
-        samples.append(img.get("img", None))
+            
+        samples.append(img.get("img"))
         labels.append(array)
 
 
 convert_to_trainingsdata()
 
 x_train = np.array(samples[:int(len(samples) / 2)])
-x_test = np.array(samples[int(len(samples) / 2):])
+del samples[:int(len(samples) / 2)]
+x_test = np.array(samples)
 
 del samples[:]
 
 y_train = np.array(labels[:int(len(labels) / 2)])
-y_test = np.array(labels[int(len(labels) / 2):])
+del labels[:int(len(labels) / 2)]
+y_test = np.array(labels)
 
 del labels[:]
 
@@ -79,53 +81,35 @@ del labels[:]
 model = Sequential([
     # width x hight x dimension
     # 600x600x3
-    Conv2D(20, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform", input_shape=(600, 600, 3)),
-    # 596x596x20
+    Conv2D(10, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform", input_shape=(600, 600, 3)),
+    # 596x596x10
+    MaxPool2D((2,2)),
+    # 298x298x10
     Conv2D(20, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 592x592x20
-    MaxPool2D((2,2), data_format="channels_last"),
-    # 296x296x20
-    Conv2D(40, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 292x292x40
-    Conv2D(40, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 288x288x40
-    MaxPool2D((2,2), data_format="channels_last"),
-    # 144x144x40
-    Conv2D(80, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 140x140x80
-    Conv2D(80, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 136x136x80
-    MaxPool2D((2,2), data_format="channels_last"),
-    # 68x68x80
-    Conv2D(160, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 64x64x160
-    Conv2D(160, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 60x60x160
-    Conv2D(320, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 56x56x320
-    Conv2D(160, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 52x52x160
-    Conv2D(160, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 48x48x160
-    Conv2D(80, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 44x44x80
-    Conv2D(40, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 40x40x40
+    # 294x294x20
     Conv2D(20, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 36x36x20
-    Conv2D(4, 7, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform", activation="softmax"),
+    # 290x290x20
+    MaxPool2D((3,3)),
+    # 96x96x20
+    Conv2D(40, 3, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
+    # 94x94x40
+    MaxPool2D((2,2)),
+    # 47x47x40
+    Conv2D(40, 3, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
+    # 45x45x40
+    Conv2D(4, 16, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform", activation="softmax"),
     # 30x30x4 --> Output
 ])
 
 model.summary()
 
 model.compile(
-    SGD(lr=0.001), 
+    #SGD(lr=0.001),
+    #SGD(lr=0.01),
+    SGD(lr=0.01),
     loss="mean_squared_error",  
     metrics=[
-        "accuracy", 
-        "binary_accuracy", 
-        "categorical_accuracy"
+        "accuracy"
     ]
 )
 
@@ -143,3 +127,8 @@ score = model.evaluate(
     batch_size=btch_size,
     verbose=1
 )
+
+predictions = model.predict(x_test)
+print(predictions)
+
+exit()
