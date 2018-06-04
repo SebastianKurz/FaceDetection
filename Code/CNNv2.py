@@ -95,8 +95,8 @@ model = Sequential([
     # 94x94x40
     MaxPool2D((2,2)),
     # 47x47x40
-    Conv2D(40, 3, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 45x45x40
+    Conv2D(80, 3, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
+    # 45x45x80
     Conv2D(4, 16, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform", activation="softmax"),
     # 30x30x4 --> Output
 ])
