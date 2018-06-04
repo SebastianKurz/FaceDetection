@@ -81,22 +81,22 @@ del labels[:]
 model = Sequential([
     # width x hight x dimension
     # 600x600x3
-    Conv2D(10, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform", input_shape=(600, 600, 3)),
-    # 596x596x10
+    Conv2D(20, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform", input_shape=(600, 600, 3)),
+    # 596x596x20
     MaxPool2D((2,2)),
-    # 298x298x10
-    Conv2D(20, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 294x294x20
-    Conv2D(20, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 290x290x20
+    # 298x298x20
+    Conv2D(40, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
+    # 294x294x40
+    Conv2D(40, 5, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
+    # 290x290x40
     MaxPool2D((3,3)),
-    # 96x96x20
-    Conv2D(40, 3, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 94x94x40
-    MaxPool2D((2,2)),
-    # 47x47x40
+    # 96x96x40
     Conv2D(80, 3, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
-    # 45x45x80
+    # 94x94x80
+    MaxPool2D((2,2)),
+    # 47x47x80
+    Conv2D(160, 3, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
+    # 45x45x160
     Conv2D(4, 16, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform", activation="softmax"),
     # 30x30x4 --> Output
 ])
