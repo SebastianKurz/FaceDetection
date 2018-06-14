@@ -1,7 +1,9 @@
 from keras.models import Sequential
 from keras.layers import Conv2D
 from keras.layers import MaxPool2D
+from keras.layers import Dense
 from keras.optimizers import SGD
+from keras.activations import elu
 import numpy as np
 import cv2
 
@@ -44,7 +46,7 @@ def convert_to_trainingsdata():
     for img in images:
         sfw = img.get("sfw", None)
         sfh = img.get("sfh", None)
-        array = np.zeros(shape=(row_size, row_size, 4))
+        array = np.zeros(shape=(row_size, row_size, 5))
 
         positions = img.get("positions", None)
         for position in positions:
@@ -54,10 +56,11 @@ def convert_to_trainingsdata():
             h = position.get("height", None)
 
             label_position = convert_coordinate_to_label(x, y ,w, h, sfw, sfh)
-            array[label_position.get("i_x"), label_position.get("i_y"), 0] = label_position.get("x_rel")
-            array[label_position.get("i_x"), label_position.get("i_y"), 1] = label_position.get("y_rel")
-            array[label_position.get("i_x"), label_position.get("i_y"), 2] = label_position.get("w")
-            array[label_position.get("i_x"), label_position.get("i_y"), 3] = label_position.get("h")
+            array[label_position.get("i_x"), label_position.get("i_y"), 0] = 1
+            array[label_position.get("i_x"), label_position.get("i_y"), 1] = label_position.get("x_rel") / sliding_window_size
+            array[label_position.get("i_x"), label_position.get("i_y"), 2] = label_position.get("y_rel") / sliding_window_size
+            array[label_position.get("i_x"), label_position.get("i_y"), 3] = label_position.get("w") / sliding_window_size
+            array[label_position.get("i_x"), label_position.get("i_y"), 4] = label_position.get("h") / sliding_window_size
             
         samples.append(img.get("img"))
         labels.append(array)
@@ -97,14 +100,20 @@ model = Sequential([
     # 47x47x80
     Conv2D(160, 3, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
     # 45x45x160
-    Conv2D(4, 16, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform", activation="softmax"),
-    # 30x30x4 --> Output
+    Conv2D(5, 16, strides=(1, 1), data_format="channels_last", kernel_initializer="glorot_uniform"),
+    # 30x30x5
+    Dense(256, activation=None, use_bias = True, kernel_initializer='glorot_uniform', bias_initializer='zeros'),
+    # 30x30x5
+    Dense(128, activation=None, use_bias = True, kernel_initializer='glorot_uniform', bias_initializer='zeros'),
+    # 30x30x5
+    Dense(5, activation='sigmoid', use_bias = True, kernel_initializer='glorot_uniform', bias_initializer='zeros'),
+    # 30x30x5 --> Output
 ])
 
 model.summary()
 
 model.compile(
-    #SGD(lr=0.001),
+    #SGD(lr=0.001), 
     #SGD(lr=0.01),
     SGD(lr=0.01),
     loss="mean_squared_error",  
@@ -116,6 +125,7 @@ model.compile(
 model.fit(
     x_train,
     y_train,
+    validation_split = 0.3,
     batch_size=btch_size,
     epochs=epoch_amount,
     verbose=2
@@ -129,6 +139,19 @@ score = model.evaluate(
 )
 
 predictions = model.predict(x_test)
-print(predictions)
+# print(predictions)
 
-exit()
+for p in predictions:
+    shape = p.shape
+    
+    for x in range(int(shape[0])):
+        for y in range(int(shape[1])):
+            if(p[x][y][0] > 0):
+                print(p[x][y][0])
+                print(p[x][y][1])
+                print(p[x][y][2])
+                print(p[x][y][3])
+                print(p[x][y][4])
+
+
+# exit()
